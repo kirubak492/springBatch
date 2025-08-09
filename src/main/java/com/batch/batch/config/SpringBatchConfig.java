@@ -18,6 +18,7 @@ import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -85,9 +86,20 @@ public class SpringBatchConfig {
     }
 
     @Bean
+    public Step helloStep() {
+        return new StepBuilder("helloStep", jobrepo)
+                .tasklet((contribution, chunkContext) -> {
+                    System.out.println("Hello from Spring Batch!");
+                    return RepeatStatus.FINISHED;
+                }, transactionManager)
+                .build();
+    }
+
+    @Bean
     public Job job() {
-        return new JobBuilder("myjob", jobrepo)
+        return new JobBuilder("myjobtest", jobrepo)
                 .start(step())
+                .next(helloStep())
                 .build();
     }
 }
